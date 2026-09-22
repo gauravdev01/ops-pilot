@@ -7,7 +7,12 @@ from app.services.ollama_provider import OllamaProvider
 def get_jd_analyzer() -> JDAnalyzerAgent:
     """Create the job-description analyzer dependency."""
     settings = get_settings()
-    model = settings.model_name or "qwen2.5:7b"
-    provider = OllamaProvider(model=model)
+    if settings.model_provider == "local":
+        if not settings.model_name:
+            raise ValueError("MODEL_NAME must be configured for the local provider")
+        provider = OllamaProvider(model=settings.model_name)
+    else:
+        raise ValueError(f"Unsupported model provider: {settings.model_provider}")
+
     gateway = ModelGateway(provider)
     return JDAnalyzerAgent(gateway)
