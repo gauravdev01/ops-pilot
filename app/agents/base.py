@@ -1,11 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar
-
-InputT = TypeVar("InputT")
-OutputT = TypeVar("OutputT")
 
 
-class BaseAgent(ABC, Generic[InputT, OutputT]):
+class BaseAgent[InputT, OutputT](ABC):
     """Define the contract implemented by an Ops-Pilot agent."""
 
     @property
