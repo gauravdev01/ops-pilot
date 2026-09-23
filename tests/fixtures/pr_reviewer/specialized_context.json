@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "title": "Exercise specialized reviewers",
+    "description": "Fixture for deterministic reviewer coverage",
+    "source_branch": "feature/reviewers",
+    "target_branch": "main",
+    "mergeable": false,
+    "mergeable_state": "dirty"
+  },
+  "files": [
+    {
+      "path": "app/unsafe.py",
+      "status": "modified",
+      "content": "import time\n\nasync def run():\n    time.sleep(1)\n    for path in repository.rglob('*.py'):\n        pass\n    return eval('1')\n\nrequest.get('/health', verify=False)\n\ntry:\n    pass\nexcept Exception:\n    pass\n"
+    },
+    {
+      "path": "app/api.py",
+      "status": "modified",
+      "content": "@router.get('/items')\ndef items():\n    return SELECT * FROM items\n"
+    },
+    {
+      "path": "requirements.txt",
+      "status": "modified",
+      "content": "httpx\n"
+    },
+    {
+      "path": ".github/workflows/check.yml",
+      "status": "modified",
+      "content": "name: check\n"
+    },
+    {
+      "path": "app/workflow.py",
+      "status": "modified",
+      "content": "def approve():\n    # TODO finish payment status transition\n    return None\n"
+    }
+  ],
+  "impact": {
+    "tests": [],
+    "configuration": ["app/config.py"],
+    "dependency_changes": ["requirements.txt"],
+    "callers": []
+  }
+}
