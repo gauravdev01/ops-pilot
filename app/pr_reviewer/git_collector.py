@@ -25,6 +25,7 @@ class LocalGitCollector:
         diff = self._run("diff", "--find-renames", "--unified=80", merge_base, head)
         files = self._collect_files(merge_base, head, diff)
         commits = self._collect_commits(merge_base, head)
+        recent_history = self._collect_recent_history(files, head)
         title = commits[0].message.splitlines()[0] if commits else source_branch
         metadata = PRMetadata(
             title=title,
@@ -40,6 +41,7 @@ class LocalGitCollector:
             diff=diff,
             base_sha=merge_base,
             head_sha=self._run("rev-parse", head).strip(),
+            recent_history=recent_history,
         )
 
     def _collect_files(self, base: str, head: str, diff: str) -> list[ChangedFile]:
@@ -89,6 +91,29 @@ class LocalGitCollector:
                 sha, author, message = parts
                 commits.append(CommitInfo(sha=sha, author=author, message=message))
         return commits
+
+    def _collect_recent_history(
+        self, files: list[ChangedFile], head: str, limit: int = 10
+    ) -> list[CommitInfo]:
+        seen: set[str] = set()
+        history: list[CommitInfo] = []
+        for item in files:
+            raw = self._run(
+                "log",
+                f"-{limit}",
+                "--format=%H%x09%an%x09%s",
+                head,
+                "--",
+                item.path,
+            )
+            for line in raw.splitlines():
+                parts = line.split("\t", 2)
+                if len(parts) != 3 or parts[0] in seen:
+                    continue
+                sha, author, message = parts
+                seen.add(sha)
+                history.append(CommitInfo(sha=sha, author=author, message=message))
+        return history[:limit]
 
     def _default_base(self) -> str:
         for candidate in ("origin/main", "main", "origin/master", "master"):

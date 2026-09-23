@@ -84,6 +84,8 @@ def test_local_collector_identifies_changed_files(tmp_path: Path) -> None:
     assert context.files[0].additions == 2
     assert "def after" in context.files[0].content
     assert context.commits[0].message == "change service"
+    assert context.recent_history
+    assert context.recent_history[0].message == "change service"
 
 
 def test_context_selection_includes_related_tests_and_dependencies(tmp_path: Path) -> None:
