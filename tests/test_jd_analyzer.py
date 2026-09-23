@@ -117,3 +117,18 @@ async def test_execute_sends_job_description_to_gateway() -> None:
 
     assert len(gateway.prompts) == 1
     assert job_description in gateway.prompts[0]
+
+
+@pytest.mark.asyncio
+async def test_execute_rejects_null_list_field() -> None:
+    response = (
+        '{"title":"Backend Engineer","seniority":null,'
+        '"required_skills":["Java"],"preferred_skills":[],'
+        '"responsibilities":null,'
+        '"experience_min_years":2,"experience_max_years":null,'
+        '"keywords":["backend"]}'
+    )
+    agent, _ = create_agent(response)
+
+    with pytest.raises(ValidationError):
+        await agent.execute("Backend Engineer with 2+ years of experience.")
