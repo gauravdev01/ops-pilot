@@ -21,21 +21,43 @@ class JDAnalyzerAgent(BaseAgent[str, JDAnalysis]):
             raise ValueError("Job description cannot be empty")
 
         prompt = f"""Analyze the following software engineering job description.
-Return ONLY valid JSON matching this exact structure, with these fields:
-- title
-- seniority
-- required_skills
-- preferred_skills
-- responsibilities
-- experience_min_years
-- experience_max_years
-- keywords
+    Return ONLY valid JSON matching this exact structure:
+    {{
+        "title": "string",
+        "seniority": "string or null",
+        "required_skills": [],
+        "preferred_skills": [],
+        "responsibilities": [],
+        "experience_min_years": null,
+        "experience_max_years": null,
+        "keywords": []
+    }}
 
-For experience requirements:
-- For a range such as "3-5 years", return 3 and 5.
-- For "5+ years", return 5 and null.
-- For a single requirement such as "2 years", return 2 and 2.
-- If experience is not specified, return null for both.
+    Schema rules:
+    - title MUST be a JSON string.
+    - seniority MUST be a JSON string or null.
+    - required_skills MUST be an array of strings.
+    - preferred_skills MUST be an array of strings.
+    - responsibilities MUST be an array of strings.
+    - keywords MUST be an array of strings.
+    - experience_min_years MUST be an integer or null.
+    - experience_max_years MUST be an integer or null.
+    - Never return null for an array field.
+    - If no values exist for an array field, return [].
+    - Never return an array where a string is expected.
+    - Do not invent information that is not supported by the job description.
+
+    For experience requirements:
+    - "3-5 years" -> min=3, max=5.
+    - "5+ years" -> min=5, max=null.
+    - "2 years" -> min=2, max=2.
+    - If no maximum is explicitly stated, max MUST be null.
+    - Never invent a maximum experience value.
+    - If experience is not specified, both must be null.
+
+    Return ONLY valid JSON.
+    Do not use markdown fences.
+    Do not include explanatory text outside the JSON.
 
 Job description:
 {input_data}

@@ -50,6 +50,29 @@ async def test_execute_returns_valid_jd_analysis() -> None:
 
 
 @pytest.mark.asyncio
+async def test_execute_handles_open_ended_experience_requirement() -> None:
+    response = (
+        '{"title":"Platform Engineer","seniority":null,'
+        '"required_skills":["Python"],"preferred_skills":[],'
+        '"responsibilities":["Build platform services"],'
+        '"experience_min_years":2,"experience_max_years":null,'
+        '"keywords":["platform"]}'
+    )
+    agent, _ = create_agent(response)
+
+    result = await agent.execute(
+        "Platform Engineer role requiring 2+ years of Python experience."
+    )
+
+    assert result.experience_min_years == 2
+    assert result.experience_max_years is None
+    assert isinstance(result.required_skills, list)
+    assert isinstance(result.preferred_skills, list)
+    assert isinstance(result.responsibilities, list)
+    assert isinstance(result.keywords, list)
+
+
+@pytest.mark.asyncio
 async def test_execute_rejects_empty_job_description() -> None:
     agent, gateway = create_agent()
 
