@@ -48,9 +48,12 @@ class LocalGitCollector:
         names = self._run("diff", "--name-status", "--find-renames", base, head)
         numstats = self._run("diff", "--numstat", "--find-renames", base, head)
         stat_by_path: dict[str, tuple[int, int]] = {}
+        binary_paths: set[str] = set()
         for line in numstats.splitlines():
             parts = line.split("\t")
-            if len(parts) >= 3 and parts[0].isdigit() and parts[1].isdigit():
+            if len(parts) >= 3 and parts[0] == "-" and parts[1] == "-":
+                binary_paths.add(parts[-1])
+            elif len(parts) >= 3 and parts[0].isdigit() and parts[1].isdigit():
                 stat_by_path[parts[-1]] = (int(parts[0]), int(parts[1]))
 
         files: list[ChangedFile] = []
@@ -74,7 +77,7 @@ class LocalGitCollector:
                     patch=patch,
                     content=content,
                     base_content=base_content,
-                    is_binary="GIT binary patch" in patch or "Binary files" in patch,
+                    is_binary=path in binary_paths,
                     renamed_from=old_path,
                 )
             )

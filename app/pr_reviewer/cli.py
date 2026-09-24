@@ -66,3 +66,6 @@ async def run(args: argparse.Namespace) -> int:
 def main() -> None:
     args = build_parser().parse_args()
     raise SystemExit(asyncio.run(run(args)))
+
+if __name__ == "__main__":
+    main()

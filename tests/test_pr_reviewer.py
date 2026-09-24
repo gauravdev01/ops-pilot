@@ -88,6 +88,30 @@ def test_local_collector_identifies_changed_files(tmp_path: Path) -> None:
     assert context.recent_history[0].message == "change service"
 
 
+def test_local_collector_does_not_mark_text_containing_binary_files_as_binary(
+    tmp_path: Path,
+) -> None:
+    def git(*args: str) -> None:
+        subprocess.run(["git", *args], cwd=tmp_path, check=True, capture_output=True)
+
+    git("init", "-q")
+    git("config", "user.email", "test@example.com")
+    git("config", "user.name", "Test User")
+    source = tmp_path / "notes.txt"
+    source.write_text("initial\n", encoding="utf-8")
+    git("add", ".")
+    git("commit", "-qm", "initial")
+    git("branch", "-M", "main")
+    git("switch", "-qc", "feature")
+    source.write_text("Binary files\n", encoding="utf-8")
+    git("add", ".")
+    git("commit", "-qm", "add text")
+
+    context = LocalGitCollector(tmp_path).collect(base="main")
+
+    assert context.files[0].is_binary is False
+
+
 def test_context_selection_includes_related_tests_and_dependencies(tmp_path: Path) -> None:
     source = tmp_path / "app" / "service.py"
     source.parent.mkdir()
