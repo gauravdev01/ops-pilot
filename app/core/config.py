@@ -9,6 +9,13 @@ class Settings(BaseSettings):
     debug: bool = True
     model_provider: str = "local"
     model_name: str = ""
+    github_token: str = ""
+    github_repository: str = ""
+    github_api_url: str = "https://api.github.com"
+    reviewer_max_files: int = 40
+    reviewer_max_file_size: int = 120_000
+    reviewer_max_context_chars: int = 400_000
+    reviewer_max_findings: int = 50
 
     model_config = SettingsConfigDict(env_file=".env")
 
